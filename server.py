@@ -37,7 +37,6 @@ class Server:
                 self.send_welcome_msg(cliSock)
                 time.sleep(0.5)
                 self.send_user_req(cliSock)
-                testUser = User("Hayden","Woop","#FFFFFF")#Test user for testing the user data structure, update when able to query for user
                 handle_client_thread=threading.Thread(target=self.handle_client,args=(cliSock,))
                 handle_client_thread.start()
                 self.running_threads.append(handle_client_thread)
