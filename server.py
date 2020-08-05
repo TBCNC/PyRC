@@ -50,7 +50,6 @@ class Server:
         ourMsg = Message(MessageType.ServerGetUserInfo,"")
         data=pickle.dumps(ourMsg)
         conn.send(data)
-        print("SENT USER REQ")
     def send_message(self,msgtype,msg,conn):
         ourMessage=Message(msgtype,msg)
         data=pickle.dumps(ourMessage)
@@ -75,7 +74,6 @@ class Server:
             self.send_msg_to_all(msgtosend,src)
         elif msg.msgtype==MessageType.UserInfo:
             userData=pickle.loads(msg.msg)
-            print("RECIEVED USER " + userData.username)
             ourUser = User(userData.username,userData.bio,userData.colour)
             ourConn = Connection(src,ourUser)
             self.client_list[src]=ourConn
@@ -97,7 +95,12 @@ class Server:
         self.sock.shutdown(socket.SHUT_RDWR)#Stop receive and sends
         self.sock.close()
 
-ourServer = Server("127.0.0.1",1254,"Charles' Server","Welcome to my server")
+print("Welcome to PyRC server")
+ipaddr = input("Please enter the IP you are binding to:")
+port = int(input("Please enter a port:"))
+servername = input("Enter a server name:")
+motd = input("Enter a MOTD:")
+ourServer = Server(ipaddr,port,servername,motd)
 try:
     ourServer.start_server()
 except KeyboardInterrupt:

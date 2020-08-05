@@ -49,12 +49,10 @@ class Client:
         if msg.msgtype==MessageType.UserMessage or msg.msgtype==MessageType.ServerWelcome:#Add different colour coding later
             print(msg.msg)
         elif msg.msgtype==MessageType.ServerGetUserInfo:
-            print("GOT USER REQ")
             userData = pickle.dumps(self.user)
             ourMsg = Message(MessageType.UserInfo,userData)
             data=pickle.dumps(ourMsg)
             self.sock.send(data)#Bodged for now
-            print("SENT USER RES")
     
     #Maybe should do better error handling here? Fine for now
     def send_message(self,msg):
@@ -67,12 +65,16 @@ class Client:
     def close_client(self):
         self.join_threads()
         self.sock.close()
-
-ourUser = User("Charles","Test Bio")
-ourClient = Client(ourUser,"127.0.0.1",1254)
+#Lack of input validation, proof of concept, will use gui
+print("Welcome to PyRC")
+ipaddr = input("Please enter an IP address:")
+port = int(input("Please enter the port number:"))
+name=input("Please input your username:")
+bio=input("Input a bio (optional):")
+ourUser = User(name,bio)
+ourClient = Client(ourUser,ipaddr,port)
 try:
     ourClient.connect_to_server()
     ourClient.close_client()
 except ConnectionRefusedError:
     print("Could not connect to server..")
-print("Closed connection with server.")
