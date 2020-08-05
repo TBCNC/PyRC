@@ -61,7 +61,7 @@ class Server:
             try:
                 data=conn.recv(self.buffer_size)
                 if not data:
-                    print(conn.user_data.username+" has disconnected.")
+                    print(self.client_list[conn].user_data.username+" has disconnected.")
                     self.client_list.pop(conn)
                     break
                 fullMsg = pickle.loads(data)
@@ -98,7 +98,7 @@ class Server:
         self.sock.shutdown(socket.SHUT_RDWR)#Stop receive and sends
         self.sock.close()
 
-ourServer = Server("127.0.0.1",1253,"Charles' Server","Welcome to my server")
+ourServer = Server("127.0.0.1",1254,"Charles' Server","Welcome to my server")
 try:
     ourServer.start_server()
 except KeyboardInterrupt:

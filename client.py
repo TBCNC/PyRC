@@ -69,7 +69,7 @@ class Client:
         self.sock.close()
 
 ourUser = User("Charles","Test Bio")
-ourClient = Client(ourUser,"127.0.0.1",1253)
+ourClient = Client(ourUser,"127.0.0.1",1254)
 try:
     ourClient.connect_to_server()
     ourClient.close_client()
