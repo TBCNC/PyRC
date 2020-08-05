@@ -26,28 +26,34 @@ class Server:
         self.sock.listen()
         print("Started server!")
         while self.server_running:
-            print("Waiting for connection...")
-            cliSock,addr=self.sock.accept()
-            print("Client connected from %s" % str(addr))
-            #self.client_list.append(cliSock)#Socket for now, will update to have a user object
-            welcomeMsg = "You have joined "+self.name+",welcome.\nMOTD:"+self.motd
-            cliSock.send(welcomeMsg.encode("utf8"))#Maybe change this to unicode
-            testUser = User("Hayden","Woop","#FFFFFF")#Test user for testing the user data structure, update when able to query for user
-            newConn=Connection(cliSock,testUser)
-            handle_client_thread=threading.Thread(target=self.handle_client,args=(newConn,))
-            handle_client_thread.start()
-            self.client_list.append(newConn)
-            self.running_threads.append(handle_client_thread)
+            try:
+                cliSock,addr=self.sock.accept()
+                cliSock.setblocking(False)
+                print("Client connected from %s" % str(addr))
+                #self.client_list.append(cliSock)#Socket for now, will update to have a user object
+                welcomeMsg = "You have joined "+self.name+",welcome.\nMOTD:"+self.motd
+                cliSock.send(welcomeMsg.encode("utf8"))#Maybe change this to unicode
+                testUser = User("Hayden","Woop","#FFFFFF")#Test user for testing the user data structure, update when able to query for user
+                newConn=Connection(cliSock,testUser)
+                handle_client_thread=threading.Thread(target=self.handle_client,args=(newConn,))
+                handle_client_thread.start()
+                self.client_list.append(newConn)
+                self.running_threads.append(handle_client_thread)
+            except BlockingIOError:
+                continue
     def handle_client(self,conn):
         while self.server_running:
-            data=conn.conn_sock.recv(self.buffer_size)
-            if not data:
-                print(conn.user_data.username+" has disconnected.")
-                self.client_list.remove(conn)
-                break
-            msgToSend=conn.user_data.username+":"+data.decode("utf8")
-            print(msgToSend)
-            self.send_to_all(msgToSend,conn)
+            try:
+                data=conn.conn_sock.recv(self.buffer_size)
+                if not data:
+                    print(conn.user_data.username+" has disconnected.")
+                    self.client_list.remove(conn)
+                    break
+                msgToSend=conn.user_data.username+":"+data.decode("utf8")
+                print(msgToSend)
+                self.send_to_all(msgToSend,conn)
+            except BlockingIOError:
+                continue
     #Send a message to all connected sockets other than exclusion_sock
     def send_to_all(self,msg,exclusion_conn=None):
         for conn in self.client_list:
@@ -66,9 +72,10 @@ class Server:
         self.sock.shutdown(socket.SHUT_RDWR)#Stop receive and sends
         self.sock.close()
 
-ourServer = Server("127.0.0.1",1239,"Charles' Server","Welcome to my server")
+ourServer = Server("127.0.0.1",1246,"Charles' Server","Welcome to my server")
 try:
     ourServer.start_server()
 except KeyboardInterrupt:
     print("Closing server...")
     ourServer.close_server()
+    print("Server closed.")
