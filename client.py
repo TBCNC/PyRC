@@ -1,6 +1,9 @@
 import socket
 import threading
+import pickle
 from user import User
+from messages import Message
+from messages import MessageType
 
 class Client:
     running_threads=[]
@@ -38,12 +41,26 @@ class Client:
                     print("Lost connection with server..")
                     self.client_on=False
                     break
-                print(data.decode("utf8"))
+                ourMessage=pickle.loads(data)
+                self.handle_message(ourMessage)
             except BlockingIOError:
                 continue
+    def handle_message(self,msg):
+        if msg.msgtype==MessageType.UserMessage or msg.msgtype==MessageType.ServerWelcome:#Add different colour coding later
+            print(msg.msg)
+        elif msg.msgtype==MessageType.ServerGetUserInfo:
+            print("GOT USER REQ")
+            userData = pickle.dumps(self.user)
+            ourMsg = Message(MessageType.UserInfo,userData)
+            data=pickle.dumps(ourMsg)
+            self.sock.send(data)#Bodged for now
+            print("SENT USER RES")
+    
     #Maybe should do better error handling here? Fine for now
     def send_message(self,msg):
-        self.sock.send(msg.encode("utf8"))
+        newMsg = Message(MessageType.UserMessage,msg)
+        toSend = pickle.dumps(newMsg)
+        self.sock.send(toSend)
     def join_threads(self):
         for thread in self.running_threads:
             thread.join()
@@ -52,7 +69,7 @@ class Client:
         self.sock.close()
 
 ourUser = User("Charles","Test Bio")
-ourClient = Client(ourUser,"127.0.0.1",1246)
+ourClient = Client(ourUser,"127.0.0.1",1253)
 try:
     ourClient.connect_to_server()
     ourClient.close_client()

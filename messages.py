@@ -4,14 +4,16 @@ Messages will be formatted in the following way:
 -Rest of the message will contain data
 '''
 import enum
+import pickle
 #All types of messages
 class MessageType(enum.Enum):
     ServerMessage=1
     UserMessage=2
     ServerGetUserInfo=3
-
+    ServerWelcome=4
+    UserInfo=5
+#Very basic setup, add things later here such as channel, date, etc.
 class Message:
     def __init__(self,msgtype,msg):
         self.msgtype=msgtype
         self.msg=msg
-    

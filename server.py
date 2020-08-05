@@ -1,5 +1,9 @@
 import socket
+import time
+import pickle
 import threading
+from messages import Message
+from messages import MessageType
 from user import User
 
 #Acts as a simple struct for handling connections
@@ -10,7 +14,7 @@ class Connection:
 
 class Server:
     #We will need to make a mutex/semaphore for this perhaps and many other things to prevent race conditions
-    client_list=[]
+    client_list={}#Dictionary with socket as key, Connection object as value
     running_threads=[]
     def __init__(self,addr,port,name,motd):
         self.addr=addr
@@ -30,38 +34,60 @@ class Server:
                 cliSock,addr=self.sock.accept()
                 cliSock.setblocking(False)
                 print("Client connected from %s" % str(addr))
-                #self.client_list.append(cliSock)#Socket for now, will update to have a user object
-                welcomeMsg = "You have joined "+self.name+",welcome.\nMOTD:"+self.motd
-                cliSock.send(welcomeMsg.encode("utf8"))#Maybe change this to unicode
+                self.send_welcome_msg(cliSock)
+                time.sleep(0.5)
+                self.send_user_req(cliSock)
                 testUser = User("Hayden","Woop","#FFFFFF")#Test user for testing the user data structure, update when able to query for user
-                newConn=Connection(cliSock,testUser)
-                handle_client_thread=threading.Thread(target=self.handle_client,args=(newConn,))
+                handle_client_thread=threading.Thread(target=self.handle_client,args=(cliSock,))
                 handle_client_thread.start()
-                self.client_list.append(newConn)
                 self.running_threads.append(handle_client_thread)
             except BlockingIOError:
                 continue
+    def send_welcome_msg(self,conn):
+        ourMsg = Message(MessageType.ServerWelcome,"You have joined " + self.name + ",welcome.\nMOTD:"+self.motd)
+        data = pickle.dumps(ourMsg)
+        conn.send(data)
+    def send_user_req(self,conn):
+        ourMsg = Message(MessageType.ServerGetUserInfo,"")
+        data=pickle.dumps(ourMsg)
+        conn.send(data)
+        print("SENT USER REQ")
+    def send_message(self,msgtype,msg,conn):
+        ourMessage=Message(msgtype,msg)
+        data=pickle.dumps(ourMessage)
+        conn.send(data)
     def handle_client(self,conn):
         while self.server_running:
             try:
-                data=conn.conn_sock.recv(self.buffer_size)
+                data=conn.recv(self.buffer_size)
                 if not data:
                     print(conn.user_data.username+" has disconnected.")
-                    self.client_list.remove(conn)
+                    self.client_list.pop(conn)
                     break
-                msgToSend=conn.user_data.username+":"+data.decode("utf8")
-                print(msgToSend)
-                self.send_to_all(msgToSend,conn)
+                fullMsg = pickle.loads(data)
+                self.handle_message(fullMsg,conn)
             except BlockingIOError:
                 continue
+    def handle_message(self,msg,src):
+        if msg.msgtype==MessageType.UserMessage:#Add different colour coding later
+            strtosend = self.client_list[src].user_data.username+":"+msg.msg
+            print(strtosend)
+            msgtosend = Message(MessageType.UserMessage,strtosend)
+            self.send_msg_to_all(msgtosend,src)
+        elif msg.msgtype==MessageType.UserInfo:
+            userData=pickle.loads(msg.msg)
+            print("RECIEVED USER " + userData.username)
+            ourUser = User(userData.username,userData.bio,userData.colour)
+            ourConn = Connection(src,ourUser)
+            self.client_list[src]=ourConn
     #Send a message to all connected sockets other than exclusion_sock
-    def send_to_all(self,msg,exclusion_conn=None):
+    def send_msg_to_all(self,msg,exclusion_conn=None):
         for conn in self.client_list:
             if conn!=exclusion_conn:
-                conn.conn_sock.send(msg.encode("utf8"))
+                conn.send(pickle.dumps(msg))
     def close_all_sockets(self):
         for conn in self.client_list:
-            conn.conn_sock.close()
+            conn.close()
     def join_all_threads(self):
         for thread in self.running_threads:
             thread.join()
@@ -72,7 +98,7 @@ class Server:
         self.sock.shutdown(socket.SHUT_RDWR)#Stop receive and sends
         self.sock.close()
 
-ourServer = Server("127.0.0.1",1246,"Charles' Server","Welcome to my server")
+ourServer = Server("127.0.0.1",1253,"Charles' Server","Welcome to my server")
 try:
     ourServer.start_server()
 except KeyboardInterrupt:
