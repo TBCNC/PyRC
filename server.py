@@ -11,11 +11,12 @@ class Connection:
     def __init__(self,conn_sock,user_data):
         self.conn_sock=conn_sock
         self.user_data=user_data
+        
 
 class Server:
     #We will need to make a mutex/semaphore for this perhaps and many other things to prevent race conditions
     client_list={}#Dictionary with socket as key, Connection object as value
-    running_threads=[]
+    running_threads={}#Dictionary with socket as key, thread as value
     def __init__(self,addr,port,name,motd):
         self.addr=addr
         self.port=port
@@ -37,7 +38,7 @@ class Server:
                 self.send_welcome_msg(cliSock)
                 handle_client_thread=threading.Thread(target=self.handle_client,args=(cliSock,))
                 handle_client_thread.start()
-                self.running_threads.append(handle_client_thread)
+                self.running_threads[cliSock]=handle_client_thread
             except BlockingIOError:
                 continue
     #Used to check if username already exists to grant/deny entry into the server
@@ -66,6 +67,8 @@ class Server:
                 self.handle_message(fullMsg,conn)
             except BlockingIOError:
                 continue
+            except OSError:#Socket has been closed by server
+                break
     def handle_message(self,msg,src):
         if msg.msgtype==MessageType.UserMessage:#Add different colour coding later
             strtosend = self.client_list[src].user_data.username+":"+msg.msg
@@ -83,17 +86,26 @@ class Server:
             else:
                 print("Username already taken")
                 self.send_message(MessageType.UserInfoResp,"Username already taken.",src)
-                #Need to find a way to get rid of thread and socket here, but will test first
+                self.disconnect_client(src)
     #Send a message to all connected sockets other than exclusion_sock
     def send_msg_to_all(self,msg,exclusion_conn=None):
         for conn in self.client_list:
             if conn!=exclusion_conn:
                 conn.send(pickle.dumps(msg))
+    #Drops a client and running threads of that client
+    def disconnect_client(self,sock):
+        print("Disconnecting client")
+        sock.close()
+        if sock in self.running_threads:
+            self.running_threads.pop(sock)
+        if sock in self.client_list:#If they were given a conn object (i.e accepted into the server fully)
+            self.client_list.pop(sock)
+        print("Disconnected client")
     def close_all_sockets(self):
         for conn in self.client_list:
             conn.close()
     def join_all_threads(self):
-        for thread in self.running_threads:
+        for key,thread in self.running_threads.items():
             thread.join()
     def close_server(self):
         self.server_running=False

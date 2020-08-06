@@ -11,6 +11,7 @@ import re
 from PyQt5 import QtCore, QtGui, QtWidgets
 from client import Client
 from user import User
+import time
 
 
 class Ui_LoginWindow(object):
