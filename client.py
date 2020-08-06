@@ -4,15 +4,17 @@ import pickle
 from user import User
 from messages import Message
 from messages import MessageType
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Client:
     running_threads=[]
-    def __init__(self,user,addr,port):
+    def __init__(self,user,addr,port,qtwin_login=None):
         self.user = user
         self.addr = addr
         self.port = port
         self.client_on=True
         self.buffer_size=1024
+        self.qtwin_login=qtwin_login
     
     def connect_to_server(self):
         try:
@@ -54,8 +56,12 @@ class Client:
         elif msg.msgtype==MessageType.UserInfoResp:
             if msg.msg=="OK":
                 print("Joined server successfully.")
+                self.qtwin_login.updateStatusLabel("Status:Joined server successfully.")
             else:
                 print("Rejected from server:{}".format(msg.msg))
+                self.qtwin_login.errBox("Connection Error","Rejected from server:{}".format(msg.msg))
+                self.qtwin_login.enableButton(True)
+                self.qtwin_login.updateStatusLabel("Status:Waiting for input...")
     
     #Maybe should do better error handling here? Fine for now
     def send_message(self,msg):

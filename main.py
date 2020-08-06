@@ -103,24 +103,26 @@ class Ui_LoginWindow(object):
         msgbox.setText(msg)
         msgbox.setIcon(QtWidgets.QMessageBox.Critical)
         msgbox.exec_()
-
+    def updateStatusLabel(self,msg):
+        self.label_connection_info.setText(msg)
+    def enableButton(self,status):
+        self.button_connect.setEnabled(status)
     def startConnection(self):
         result = self.validateInputs()
         if result[0]:
             self.button_connect.setEnabled(False)
-            self.label_connection_info.setText("Status:Attempting to connect to server...")
+            self.updateStatusLabel("Status:Attempting to connect to server...")
             self.user = User(self.text_username.text(),self.text_bio.text())
-            self.client = Client(self.user,self.text_ipaddr.text(),int(self.text_port.text()))
+            self.client = Client(self.user,self.text_ipaddr.text(),int(self.text_port.text()),self)
             res = self.client.connect_to_server()
             if res[0]:
                 #Display new window here now, but just update status for now
-                self.label_connection_info.setText("Status:Connected! Sending user info...")
+                self.updateStatusLabel("Status:Connected! Sending user info...")
                 self.client.send_user_info(self.user)
             else:
                 self.errBox("Connection error",res[1])
                 self.button_connect.setEnabled(True)
-                self.label_connection_info.setText("Status:Waiting for input...")
-            
+                self.updateStatusLabel("Status:Waiting for input...")
         else:
             self.errBox("Input error!",result[1])
 
