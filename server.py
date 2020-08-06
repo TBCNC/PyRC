@@ -35,20 +35,20 @@ class Server:
                 cliSock.setblocking(False)
                 print("Client connected from %s" % str(addr))
                 self.send_welcome_msg(cliSock)
-                time.sleep(0.5)
-                self.send_user_req(cliSock)
                 handle_client_thread=threading.Thread(target=self.handle_client,args=(cliSock,))
                 handle_client_thread.start()
                 self.running_threads.append(handle_client_thread)
             except BlockingIOError:
                 continue
+    #Used to check if username already exists to grant/deny entry into the server
+    def username_exists(self,name):
+        for key,val in self.client_list.items():
+            if val.user_data.username==name:
+                return True
+        return False
     def send_welcome_msg(self,conn):
         ourMsg = Message(MessageType.ServerWelcome,"You have joined " + self.name + ",welcome.\nMOTD:"+self.motd)
         data = pickle.dumps(ourMsg)
-        conn.send(data)
-    def send_user_req(self,conn):
-        ourMsg = Message(MessageType.ServerGetUserInfo,"")
-        data=pickle.dumps(ourMsg)
         conn.send(data)
     def send_message(self,msgtype,msg,conn):
         ourMessage=Message(msgtype,msg)
@@ -73,10 +73,17 @@ class Server:
             msgtosend = Message(MessageType.UserMessage,strtosend)
             self.send_msg_to_all(msgtosend,src)
         elif msg.msgtype==MessageType.UserInfo:
-            userData=pickle.loads(msg.msg)
-            ourUser = User(userData.username,userData.bio,userData.colour)
-            ourConn = Connection(src,ourUser)
-            self.client_list[src]=ourConn
+            userData = pickle.loads(msg.msg)
+            if not self.username_exists(userData.username):
+                #Grant access to server
+                newconn=Connection(src,userData)
+                self.client_list[src]=newconn
+                print("Accepted user " + userData.username + " into server list.")
+                self.send_message(MessageType.UserInfoResp,"OK",src)
+            else:
+                print("Username already taken")
+                self.send_message(MessageType.UserInfoResp,"Username already taken.",src)
+                #Need to find a way to get rid of thread and socket here, but will test first
     #Send a message to all connected sockets other than exclusion_sock
     def send_msg_to_all(self,msg,exclusion_conn=None):
         for conn in self.client_list:

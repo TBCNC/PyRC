@@ -9,9 +9,9 @@ import pickle
 class MessageType(enum.Enum):
     ServerMessage=1
     UserMessage=2
-    ServerGetUserInfo=3
-    ServerWelcome=4
-    UserInfo=5
+    ServerWelcome=3
+    UserInfo=4
+    UserInfoResp=5
 #Very basic setup, add things later here such as channel, date, etc.
 class Message:
     def __init__(self,msgtype,msg):

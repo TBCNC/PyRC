@@ -113,7 +113,8 @@ class Ui_LoginWindow(object):
             res = self.client.connect_to_server()
             if res[0]:
                 #Display new window here now, but just update status for now
-                self.label_connection_info.setText("Status:Connected!")
+                self.label_connection_info.setText("Status:Connected! Sending user info...")
+                self.client.send_user_info(self.user)
             else:
                 self.errBox("Connection error",res[1])
                 self.button_connect.setEnabled(True)

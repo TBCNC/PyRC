@@ -13,6 +13,7 @@ class Client:
         self.port = port
         self.client_on=True
         self.buffer_size=1024
+    
     def connect_to_server(self):
         try:
             print("Connecting to server...")
@@ -26,6 +27,10 @@ class Client:
             return (True,"OK") # Indicate successful connection to client
         except Exception as err:
             return (False,"An error has occurred while connecting:{}".format(str(err)))
+    def send_user_info(self,user):
+        userdata = pickle.dumps(user)
+        messageobj = Message(MessageType.UserInfo,userdata)
+        self.sock.send(pickle.dumps(messageobj))
     def handle_input(self,inp):
         if inp=="/quit":
             self.client_on=False
@@ -46,11 +51,11 @@ class Client:
     def handle_message(self,msg):
         if msg.msgtype==MessageType.UserMessage or msg.msgtype==MessageType.ServerWelcome:#Add different colour coding later
             print(msg.msg)
-        elif msg.msgtype==MessageType.ServerGetUserInfo:
-            userData = pickle.dumps(self.user)
-            ourMsg = Message(MessageType.UserInfo,userData)
-            data=pickle.dumps(ourMsg)
-            self.sock.send(data)#Bodged for now
+        elif msg.msgtype==MessageType.UserInfoResp:
+            if msg.msg=="OK":
+                print("Joined server successfully.")
+            else:
+                print("Rejected from server:{}".format(msg.msg))
     
     #Maybe should do better error handling here? Fine for now
     def send_message(self,msg):
