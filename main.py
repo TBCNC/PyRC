@@ -9,6 +9,8 @@
 
 import re
 from PyQt5 import QtCore, QtGui, QtWidgets
+from client import Client
+from user import User
 
 
 class Ui_LoginWindow(object):
@@ -105,7 +107,18 @@ class Ui_LoginWindow(object):
         result = self.validateInputs()
         if result[0]:
             self.button_connect.setEnabled(False)
-            self.label_connection_info.setText("Status: Attempting to connect to server...")
+            self.label_connection_info.setText("Status:Attempting to connect to server...")
+            self.user = User(self.text_username.text(),self.text_bio.text())
+            self.client = Client(self.user,self.text_ipaddr.text(),int(self.text_port.text()))
+            res = self.client.connect_to_server()
+            if res[0]:
+                #Display new window here now, but just update status for now
+                self.label_connection_info.setText("Status:Connected!")
+            else:
+                self.errBox("Connection error",res[1])
+                self.button_connect.setEnabled(True)
+                self.label_connection_info.setText("Status:Waiting for input...")
+            
         else:
             self.errBox("Input error!",result[1])
 

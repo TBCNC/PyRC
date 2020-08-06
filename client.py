@@ -14,20 +14,18 @@ class Client:
         self.client_on=True
         self.buffer_size=1024
     def connect_to_server(self):
-        print("Connecting to server...")
-        self.sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-        self.sock.connect((self.addr,self.port))
-        self.sock.setblocking(False)
-        print("Connected to server!")
-        handle_messages_thread = threading.Thread(target=self.handle_messages,args=())
-        handle_messages_thread.start()
-        self.running_threads.append(handle_messages_thread)
-        while self.client_on:
-            msgToSend=input()
-            if msgToSend=="/quit":
-                self.client_on=False
-                break
-            self.send_message(msgToSend)
+        try:
+            print("Connecting to server...")
+            self.sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+            self.sock.connect((self.addr,self.port))
+            self.sock.setblocking(False)
+            print("Connected to server!")
+            handle_messages_thread = threading.Thread(target=self.handle_messages,args=())
+            handle_messages_thread.start()
+            self.running_threads.append(handle_messages_thread)
+            return (True,"OK") # Indicate successful connection to client
+        except Exception as err:
+            return (False,"An error has occurred while connecting:{}".format(str(err)))
     def handle_input(self,inp):
         if inp=="/quit":
             self.client_on=False
@@ -65,6 +63,7 @@ class Client:
     def close_client(self):
         self.join_threads()
         self.sock.close()
+'''Old terminal UI
 #Lack of input validation, proof of concept, will use gui
 print("Welcome to PyRC")
 ipaddr = input("Please enter an IP address:")
@@ -78,3 +77,4 @@ try:
     ourClient.close_client()
 except ConnectionRefusedError:
     print("Could not connect to server..")
+'''
