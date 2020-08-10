@@ -42,11 +42,6 @@ class Client(QtCore.QObject):
         messageobj=Message(MessageType.GetUserListReq,"")
         self.sock.send(pickle.dumps(messageobj))
         print("Sent user list request")
-    def handle_input(self,inp):
-        if inp=="/quit":
-            self.client_on=False
-        else:
-            self.send_message(inp)
     def handle_messages(self):
         while self.client_on:
             try:

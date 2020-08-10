@@ -67,6 +67,11 @@ class Ui_ChatWindow(object):
         self.statusbar.setObjectName("statusbar")
         ChatWindow.setStatusBar(self.statusbar)
 
+        '''
+        Signals
+        '''
+        self.button_send.clicked.connect(self.send_message)
+        self.input_message.returnPressed.connect(self.send_message)
         self.retranslateUi(ChatWindow)
         QtCore.QMetaObject.connectSlotsByName(ChatWindow)
 
@@ -80,12 +85,12 @@ class Ui_ChatWindow(object):
         self.button_send.setText(_translate("ChatWindow", "Send"))
     def addChatMessage(self,message):
         self.text_messages.moveCursor(QtGui.QTextCursor.End)
-        self.text_messages.insertPlainText(message)
+        self.text_messages.insertPlainText(message+"\n")
     def obtainedUserList(self,userlist):
         for user in userlist:
             self.addUser(user)
     def newUserJoined(self,user):
-        self.addChatMessage("{} has joined the server.\n".format(user))
+        self.addChatMessage("{} has joined the server.".format(user))
         self.addUser(user)
     def addUser(self,user):
         self.listWidget.addItem(user)
@@ -94,7 +99,12 @@ class Ui_ChatWindow(object):
         for item in itemstoremove:
             row = self.listWidget.row(item)
             self.listWidget.takeItem(row)
-
+    #Will send whatever is in the input
+    def send_message(self):
+        message=self.input_message.text()
+        self.client.send_message(message)
+        self.addChatMessage("<{}>:{}".format(self.client.user.username,message))
+        self.input_message.setText("")
 '''
 if __name__ == "__main__":
     import sys

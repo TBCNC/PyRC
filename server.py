@@ -56,7 +56,7 @@ class Server:
                 return True
         return False
     def send_welcome_msg(self,conn):
-        ourMsg = Message(MessageType.ServerWelcome,"You have joined " + self.name + ",welcome.\nMOTD:"+self.motd+"\n")
+        ourMsg = Message(MessageType.ServerWelcome,"You have joined " + self.name + ",welcome.\nMOTD:"+self.motd)
         data = pickle.dumps(ourMsg)
         conn.send(data)
     def send_new_user_joined(self,user,exconn=None):
