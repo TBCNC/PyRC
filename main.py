@@ -11,10 +11,20 @@ import re
 from PyQt5 import QtCore, QtGui, QtWidgets
 from client import Client
 from user import User
+from chat_window import Ui_ChatWindow
 import time
 
 
 class Ui_LoginWindow(object):
+    def __init__(self):
+        self.client=Client()
+        
+    def openChatWindow(self):
+        self.window=QtWidgets.QMainWindow()
+        self.ui = Ui_ChatWindow()
+        self.ui.setupUi(self.window)
+        self.window.show()
+
     def setupUi(self, LoginWindow):
         LoginWindow.setObjectName("LoginWindow")
         LoginWindow.resize(425, 320)
@@ -82,6 +92,8 @@ class Ui_LoginWindow(object):
         self.statusbar.setObjectName("statusbar")
         LoginWindow.setStatusBar(self.statusbar)
 
+        self.client.signal_user_accepted.connect(self.userAccepted)
+        self.client.signal_user_denied.connect(self.userDenied)
         self.retranslateUi(LoginWindow)
         QtCore.QMetaObject.connectSlotsByName(LoginWindow)
     
@@ -96,7 +108,12 @@ class Ui_LoginWindow(object):
         if not usernameregex.match(self.text_username.text()):
             return (False,"Your username must be between 4 and 12 characters long with no spaces!")
         return (True,"OK")
-
+    def userAccepted(self):
+        self.updateStatusLabel('Status:Joined server successfully.')
+    def userDenied(self,msg):
+        self.errBox('Connection error','Rejected from server:{}'.format(msg))
+        self.enableButton(True)
+        self.updateStatusLabel('Status:Waiting for input...')
     def errBox(self,title,msg):
         msgbox = QtWidgets.QMessageBox()
         msgbox.setWindowTitle(title)
@@ -107,25 +124,31 @@ class Ui_LoginWindow(object):
         self.label_connection_info.setText(msg)
     def enableButton(self,status):
         self.button_connect.setEnabled(status)
+    def initClient(self,user,addr,port):
+        self.client.user=user
+        self.client.addr=addr
+        self.client.port=port
     def startConnection(self):
         result = self.validateInputs()
         if result[0]:
             self.button_connect.setEnabled(False)
             self.updateStatusLabel("Status:Attempting to connect to server...")
             self.user = User(self.text_username.text(),self.text_bio.text())
-            self.client = Client(self.user,self.text_ipaddr.text(),int(self.text_port.text()),self)
+            #self.client = Client(self.user,self.text_ipaddr.text(),int(self.text_port.text()))
+            self.initClient(self.user,self.text_ipaddr.text(),int(self.text_port.text()))
             res = self.client.connect_to_server()
             if res[0]:
                 #Display new window here now, but just update status for now
                 self.updateStatusLabel("Status:Connected! Sending user info...")
                 self.client.send_user_info(self.user)
+                #self.openChatWindow()
             else:
                 self.errBox("Connection error",res[1])
                 self.button_connect.setEnabled(True)
                 self.updateStatusLabel("Status:Waiting for input...")
         else:
             self.errBox("Input error!",result[1])
-
+    
     def retranslateUi(self, LoginWindow):
         _translate = QtCore.QCoreApplication.translate
         LoginWindow.setWindowTitle(_translate("LoginWindow", "PyRC Login"))
