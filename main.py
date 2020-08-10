@@ -82,6 +82,11 @@ class Ui_LoginWindow(object):
         self.button_connect.setEnabled(True)
         self.button_connect.setObjectName("button_connect")
         self.button_connect.clicked.connect(self.startConnection)
+        #Enter button pressed leads to connect
+        self.text_ipaddr.returnPressed.connect(self.startConnection)
+        self.text_bio.returnPressed.connect(self.startConnection)
+        self.text_port.returnPressed.connect(self.startConnection)
+        self.text_username.returnPressed.connect(self.startConnection)        
         self.formLayout.setWidget(7, QtWidgets.QFormLayout.SpanningRole, self.button_connect)
         self.verticalLayout.addLayout(self.formLayout)
         self.label_connection_info = QtWidgets.QLabel(self.centralwidget)
@@ -114,9 +119,9 @@ class Ui_LoginWindow(object):
         return (True,"OK")
 
     def userAccepted(self):
-        self.updateStatusLabel('Status:Joined server successfully.')
+        self.updateStatusLabel('Status:Waiting for input...')
+        self.enableButton(True)
         self.openChatWindow()
-        
     def userDenied(self,msg):
         self.errBox('Connection error','Rejected from server:{}'.format(msg))
         self.enableButton(True)
@@ -148,7 +153,6 @@ class Ui_LoginWindow(object):
                 #Display new window here now, but just update status for now
                 self.updateStatusLabel("Status:Connected! Sending user info...")
                 self.client.send_user_info(self.user)
-                #self.openChatWindow()
             else:
                 self.errBox("Connection error",res[1])
                 self.button_connect.setEnabled(True)

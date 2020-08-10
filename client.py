@@ -14,6 +14,7 @@ class Client(QtCore.QObject):
     signal_lost_connection=QtCore.pyqtSignal()
     signal_obtained_usernames=QtCore.pyqtSignal(list)
     signal_new_user=QtCore.pyqtSignal(str)#For now, maybe change to user
+    signal_lost_user=QtCore.pyqtSignal(str)#For now, maybe change to user
     def __init__(self,user=None,addr=None,port=None):
         super(QtCore.QObject,self).__init__()
         self.user = user
@@ -71,6 +72,8 @@ class Client(QtCore.QObject):
             self.signal_obtained_usernames.emit(pickle.loads(msg.msg))
         elif msg.msgtype==MessageType.NewUserJoined:
             self.signal_new_user.emit(msg.msg)
+        elif msg.msgtype==MessageType.UserDisconnected:
+            self.signal_lost_user.emit(msg.msg)
     #Maybe should do better error handling here? Fine for now
     def send_message(self,msg):
         newMsg = Message(MessageType.UserMessage,msg)
@@ -80,9 +83,11 @@ class Client(QtCore.QObject):
         for thread in self.running_threads:
             thread.join()
     def close_client(self):
+        print("Disconnecting client")
         self.client_on=False
         self.join_threads()
         self.sock.close()
+        print("Disconnected")
 '''Old terminal UI
 #Lack of input validation, proof of concept, will use gui
 print("Welcome to PyRC")

@@ -13,9 +13,8 @@ class ChatWindow(QtWidgets.QMainWindow):
     def __init__(self,parent,client):
         super(ChatWindow,self).__init__(parent)
         self.client=client
-        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
     def closeEvent(self,event):
-        self.client.disconnect()
+        self.client.close_client()
         self.closeAndReturn()
     def closeAndReturn(self):
         self.close()
@@ -27,6 +26,7 @@ class Ui_ChatWindow(object):
         self.client.signal_lost_connection.connect(self.lostConnection)
         self.client.signal_obtained_usernames.connect(self.obtainedUserList)
         self.client.signal_new_user.connect(self.newUserJoined)
+        self.client.signal_lost_user.connect(self.userDisconnected)
     def setupUi(self, ChatWindow):
         ChatWindow.setObjectName("ChatWindow")
         ChatWindow.resize(808, 440)
@@ -92,6 +92,9 @@ class Ui_ChatWindow(object):
     def newUserJoined(self,user):
         self.addChatMessage("{} has joined the server.".format(user))
         self.addUser(user)
+    def userDisconnected(self,user):
+        self.addChatMessage("{} has disconnected from the server.".format(user))
+        self.removeUser(user)
     def addUser(self,user):
         self.listWidget.addItem(user)
     def removeUser(self,user):

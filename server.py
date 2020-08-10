@@ -71,8 +71,10 @@ class Server:
             try:
                 data=conn.recv(self.buffer_size)
                 if not data:
-                    print(self.client_list[conn].user_data.username+" has disconnected.")
+                    username=self.client_list[conn].user_data.username
+                    print(username+" has disconnected.")
                     self.client_list.pop(conn)
+                    self.send_msg_to_all(Message(MessageType.UserDisconnected,username))
                     break
                 fullMsg = pickle.loads(data)
                 self.handle_message(fullMsg,conn)
