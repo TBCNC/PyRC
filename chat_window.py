@@ -23,8 +23,10 @@ class ChatWindow(QtWidgets.QMainWindow):
 class Ui_ChatWindow(object):
     def __init__(self,client):
         self.client=client
-        self.client.signal_new_message.connect(self.newMessage)
+        self.client.signal_new_message.connect(self.addChatMessage)
         self.client.signal_lost_connection.connect(self.lostConnection)
+        self.client.signal_obtained_usernames.connect(self.obtainedUserList)
+        self.client.signal_new_user.connect(self.newUserJoined)
     def setupUi(self, ChatWindow):
         ChatWindow.setObjectName("ChatWindow")
         ChatWindow.resize(808, 440)
@@ -67,9 +69,7 @@ class Ui_ChatWindow(object):
 
         self.retranslateUi(ChatWindow)
         QtCore.QMetaObject.connectSlotsByName(ChatWindow)
-    #Signal function for new message
-    def newMessage(self,message):
-        print(message)
+
     #Signal for losing connection
     def lostConnection(self):
         print('Lost connection')
@@ -78,9 +78,15 @@ class Ui_ChatWindow(object):
         ChatWindow.setWindowTitle(_translate("ChatWindow", "ChatWindow"))
         self.label_usersonline.setText(_translate("ChatWindow", "Users Online:"))
         self.button_send.setText(_translate("ChatWindow", "Send"))
-    def addChatMessage(self,user,message):
+    def addChatMessage(self,message):
         self.text_messages.moveCursor(QtGui.QTextCursor.End)
-        self.text_messages.insertPlainText("<{}>:{}\n".format(user,message))
+        self.text_messages.insertPlainText(message)
+    def obtainedUserList(self,userlist):
+        for user in userlist:
+            self.addUser(user)
+    def newUserJoined(self,user):
+        self.addChatMessage("{} has joined the server.\n".format(user))
+        self.addUser(user)
     def addUser(self,user):
         self.listWidget.addItem(user)
     def removeUser(self,user):
