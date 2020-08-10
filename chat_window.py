@@ -9,8 +9,22 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-
+class ChatWindow(QtWidgets.QMainWindow):
+    def __init__(self,parent,client):
+        super(ChatWindow,self).__init__(parent)
+        self.client=client
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+    def closeEvent(self,event):
+        self.client.disconnect()
+        self.closeAndReturn()
+    def closeAndReturn(self):
+        self.close()
+        self.parent().show()
 class Ui_ChatWindow(object):
+    def __init__(self,client):
+        self.client=client
+        self.client.signal_new_message.connect(self.newMessage)
+        self.client.signal_lost_connection.connect(self.lostConnection)
     def setupUi(self, ChatWindow):
         ChatWindow.setObjectName("ChatWindow")
         ChatWindow.resize(808, 440)
@@ -53,7 +67,12 @@ class Ui_ChatWindow(object):
 
         self.retranslateUi(ChatWindow)
         QtCore.QMetaObject.connectSlotsByName(ChatWindow)
-
+    #Signal function for new message
+    def newMessage(self,message):
+        print(message)
+    #Signal for losing connection
+    def lostConnection(self):
+        print('Lost connection')
     def retranslateUi(self, ChatWindow):
         _translate = QtCore.QCoreApplication.translate
         ChatWindow.setWindowTitle(_translate("ChatWindow", "ChatWindow"))
@@ -70,6 +89,7 @@ class Ui_ChatWindow(object):
             row = self.listWidget.row(item)
             self.listWidget.takeItem(row)
 
+'''
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
@@ -78,3 +98,4 @@ if __name__ == "__main__":
     ui.setupUi(ChatWindow)
     ChatWindow.show()
     sys.exit(app.exec_())
+'''

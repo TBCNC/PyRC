@@ -10,6 +10,8 @@ class Client(QtCore.QObject):
     running_threads=[]
     signal_user_accepted=QtCore.pyqtSignal()
     signal_user_denied=QtCore.pyqtSignal(str)
+    signal_new_message=QtCore.pyqtSignal(str)
+    signal_lost_connection=QtCore.pyqtSignal()
     def __init__(self,user=None,addr=None,port=None):
         super(QtCore.QObject,self).__init__()
         self.user = user
@@ -17,8 +19,6 @@ class Client(QtCore.QObject):
         self.port = port
         self.client_on=True
         self.buffer_size=1024
-    def connect_signal(self,sig,func):
-        sig.connect(func)
     def connect_to_server(self):
         try:
             print("Connecting to server...")
@@ -48,6 +48,7 @@ class Client(QtCore.QObject):
                 if not data:
                     print("Lost connection with server..")
                     self.client_on=False
+                    self.signal_lost_connection.emit()
                     break
                 ourMessage=pickle.loads(data)
                 self.handle_message(ourMessage)
@@ -56,17 +57,14 @@ class Client(QtCore.QObject):
     def handle_message(self,msg):
         if msg.msgtype==MessageType.UserMessage or msg.msgtype==MessageType.ServerWelcome:#Add different colour coding later
             print(msg.msg)
+            self.signal_new_message.emit(msg.msg)
         elif msg.msgtype==MessageType.UserInfoResp:
             if msg.msg=="OK":
                 print("Joined server successfully.")
-                #self.qtwin_login.updateStatusLabel("Status:Joined server successfully.")
                 self.signal_user_accepted.emit()
             else:
                 print("Rejected from server:{}".format(msg.msg))
                 self.signal_user_denied.emit(msg.msg)
-                #self.qtwin_login.errBox("Connection Error","Rejected from server:{}".format(msg.msg))
-                #self.qtwin_login.enableButton(True)
-                #self.qtwin_login.updateStatusLabel("Status:Waiting for input...")
     
     #Maybe should do better error handling here? Fine for now
     def send_message(self,msg):

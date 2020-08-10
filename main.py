@@ -12,6 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from client import Client
 from user import User
 from chat_window import Ui_ChatWindow
+from chat_window import ChatWindow
 import time
 
 
@@ -20,12 +21,15 @@ class Ui_LoginWindow(object):
         self.client=Client()
         
     def openChatWindow(self):
-        self.window=QtWidgets.QMainWindow()
-        self.ui = Ui_ChatWindow()
+        self.window=ChatWindow(self.main_window,self.client)
+        self.ui = Ui_ChatWindow(self.client)
         self.ui.setupUi(self.window)
+        self.main_window.hide()
         self.window.show()
+        
 
     def setupUi(self, LoginWindow):
+        self.main_window=LoginWindow
         LoginWindow.setObjectName("LoginWindow")
         LoginWindow.resize(425, 320)
         LoginWindow.setLayoutDirection(QtCore.Qt.LeftToRight)
@@ -108,8 +112,11 @@ class Ui_LoginWindow(object):
         if not usernameregex.match(self.text_username.text()):
             return (False,"Your username must be between 4 and 12 characters long with no spaces!")
         return (True,"OK")
+
     def userAccepted(self):
         self.updateStatusLabel('Status:Joined server successfully.')
+        self.openChatWindow()
+        
     def userDenied(self,msg):
         self.errBox('Connection error','Rejected from server:{}'.format(msg))
         self.enableButton(True)
