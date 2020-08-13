@@ -8,7 +8,6 @@ or
 ```
 python3 server.py server.py --ip=<ip_address> --port=<port> --name=<name> --motd=<motd>
 ```
-1
 To find out more about what these options mean, you can see the help page with:
 ```
 python3 server.py -h
