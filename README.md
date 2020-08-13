@@ -2,13 +2,13 @@ A multi-threaded chat application written in Python3 and designed with Qt Design
 # Starting the server
 You can start the server with the following commands:
 ```
-python3 server.py server.py -i \<ip_address\> -p \<port\> -n \<name\> -m \<motd\>
+python3 server.py server.py -i <ip_address> -p <port> -n <name> -m <motd>
 ```
 or
 ```
-python3 server.py server.py --ip=\<ip_address\> --port=\<port\> --name=\<name\> --motd=\<motd\>
+python3 server.py server.py --ip=<ip_address> --port=<port> --name=<name> --motd=<motd>
 ```
-
+1
 To find out more about what these options mean, you can see the help page with:
 ```
 python3 server.py -h
