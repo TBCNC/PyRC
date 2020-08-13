@@ -139,6 +139,11 @@ def print_help():
     print("PyRC Server Setup")
     print("Command usage:\nserver.py -i <ip_address> -p <port> -n <name> -m <motd>")
     print("or\nserver.py --ip=<ip_address> --port=<port> --name=<name> --motd=<motd>")
+    print("Properties and what they mean:")
+    print("--ip - The IP address you wish to bind to")
+    print("--port - The port you wish for the server to run on")
+    print("--name - The name of your server")
+    print("--motd - A MOTD that users will see when joining your server (optional)")
 def main(argv):
     ipaddr=None
     port=None
