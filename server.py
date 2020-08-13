@@ -85,7 +85,7 @@ class Server:
     
     def handle_message(self,msg,src):
         if msg.msgtype==MessageType.UserMessage:#Add different colour coding later
-            strtosend = "<"+self.client_list[src].user_data.username+">:"+msg.msg
+            strtosend = "&lt;"+self.client_list[src].user_data.username+"&gt;:"+msg.msg
             print(strtosend)
             msgtosend = Message(MessageType.UserMessage,strtosend)
             self.send_msg_to_all(msgtosend,src)

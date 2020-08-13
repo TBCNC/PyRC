@@ -94,15 +94,16 @@ class Ui_ChatWindow(object):
         self.button_send.setText(_translate("ChatWindow", "Send"))
     def addChatMessage(self,message):
         self.text_messages.moveCursor(QtGui.QTextCursor.End)
-        self.text_messages.insertPlainText(message+"\n")
+        self.text_messages.insertHtml(message)
+        self.text_messages.insertPlainText("\n")
     def obtainedUserList(self,userlist):
         for user in userlist:
             self.addUser(user)
     def newUserJoined(self,user):
-        self.addChatMessage("{} has joined the server.".format(user))
+        self.addChatMessage("<i>{} has joined the server.</i>".format(user))
         self.addUser(user)
     def userDisconnected(self,user):
-        self.addChatMessage("{} has disconnected from the server.".format(user))
+        self.addChatMessage("<i>{} has disconnected from the server.</i>".format(user))
         self.removeUser(user)
     def addUser(self,user):
         self.listWidget.addItem(user)
@@ -115,7 +116,7 @@ class Ui_ChatWindow(object):
     def send_message(self):
         message=self.input_message.text()
         self.client.send_message(message)
-        self.addChatMessage("<{}>:{}".format(self.client.user.username,message))
+        self.addChatMessage("&lt;{}&gt;:{}".format(self.client.user.username,message))
         self.input_message.setText("")
 '''
 if __name__ == "__main__":
