@@ -15,7 +15,7 @@ class Client(QtCore.QObject):
     signal_obtained_usernames=QtCore.pyqtSignal(list)
     signal_new_user=QtCore.pyqtSignal(str)#For now, maybe change to user
     signal_lost_user=QtCore.pyqtSignal(str)#For now, maybe change to user
-    def __init__(self,user=None,addr=None,port=None):
+    def __init__(self,user,addr,port):
         super(QtCore.QObject,self).__init__()
         self.user = user
         self.addr = addr

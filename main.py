@@ -17,8 +17,6 @@ import time
 
 
 class Ui_LoginWindow(object):
-    def __init__(self):
-        self.client=Client()
         
     def openChatWindow(self):
         self.window=ChatWindow(self.main_window,self.client)
@@ -100,9 +98,6 @@ class Ui_LoginWindow(object):
         self.statusbar = QtWidgets.QStatusBar(LoginWindow)
         self.statusbar.setObjectName("statusbar")
         LoginWindow.setStatusBar(self.statusbar)
-
-        self.client.signal_user_accepted.connect(self.userAccepted)
-        self.client.signal_user_denied.connect(self.userDenied)
         self.retranslateUi(LoginWindow)
         QtCore.QMetaObject.connectSlotsByName(LoginWindow)
     
@@ -137,9 +132,9 @@ class Ui_LoginWindow(object):
     def enableButton(self,status):
         self.button_connect.setEnabled(status)
     def initClient(self,user,addr,port):
-        self.client.user=user
-        self.client.addr=addr
-        self.client.port=port
+        self.client=Client(user,addr,port)
+        self.client.signal_user_accepted.connect(self.userAccepted)
+        self.client.signal_user_denied.connect(self.userDenied)
     def startConnection(self):
         result = self.validateInputs()
         if result[0]:
