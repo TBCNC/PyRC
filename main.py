@@ -76,6 +76,12 @@ class Ui_LoginWindow(object):
         self.text_bio = QtWidgets.QLineEdit(self.centralwidget)
         self.text_bio.setObjectName("text_bio")
         self.formLayout.setWidget(6, QtWidgets.QFormLayout.FieldRole, self.text_bio)
+        self.label_colour=QtWidgets.QLabel(self.centralwidget)
+        self.label_colour.setObjectName("label_colour")
+        self.formLayout.setWidget(7,QtWidgets.QFormLayout.LabelRole,self.label_colour)
+        self.text_colour=QtWidgets.QLineEdit(self.centralwidget)
+        self.text_colour.setObjectName("text_colour")
+        self.formLayout.setWidget(7,QtWidgets.QFormLayout.FieldRole,self.text_colour)
         self.button_connect = QtWidgets.QPushButton(self.centralwidget)
         self.button_connect.setEnabled(True)
         self.button_connect.setObjectName("button_connect")
@@ -85,7 +91,7 @@ class Ui_LoginWindow(object):
         self.text_bio.returnPressed.connect(self.startConnection)
         self.text_port.returnPressed.connect(self.startConnection)
         self.text_username.returnPressed.connect(self.startConnection)        
-        self.formLayout.setWidget(7, QtWidgets.QFormLayout.SpanningRole, self.button_connect)
+        self.formLayout.setWidget(8, QtWidgets.QFormLayout.SpanningRole, self.button_connect)
         self.verticalLayout.addLayout(self.formLayout)
         self.label_connection_info = QtWidgets.QLabel(self.centralwidget)
         self.label_connection_info.setObjectName("label_connection_info")
@@ -166,6 +172,7 @@ class Ui_LoginWindow(object):
         self.label_bio.setText(_translate("LoginWindow", "Bio:"))
         self.button_connect.setText(_translate("LoginWindow", "Connect"))
         self.label_connection_info.setText(_translate("LoginWindow", "Status:Waiting for input..."))
+        self.label_colour.setText(_translate("LoginWindow","Colour:"))
 
 
 if __name__ == "__main__":
