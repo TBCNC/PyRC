@@ -20,7 +20,8 @@ class ChatWindow(QtWidgets.QMainWindow):
         self.close()
         self.parent().show()
 class Ui_ChatWindow(object):
-    def __init__(self,client):
+    def __init__(self,client,window):
+        self.window=window
         self.client=client
         self.client.signal_new_message.connect(self.addChatMessage)
         self.client.signal_lost_connection.connect(self.lostConnection)
@@ -78,6 +79,14 @@ class Ui_ChatWindow(object):
     #Signal for losing connection
     def lostConnection(self):
         print('Lost connection')
+        self.errBox('Connection error','Lost connection with the server.')
+        self.window.closeEvent(None)
+    def errBox(self,title,msg):
+        msgbox = QtWidgets.QMessageBox()
+        msgbox.setWindowTitle(title)
+        msgbox.setText(msg)
+        msgbox.setIcon(QtWidgets.QMessageBox.Critical)
+        msgbox.exec_()
     def retranslateUi(self, ChatWindow):
         _translate = QtCore.QCoreApplication.translate
         ChatWindow.setWindowTitle(_translate("ChatWindow", "ChatWindow"))

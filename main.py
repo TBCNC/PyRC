@@ -20,7 +20,7 @@ class Ui_LoginWindow(object):
         
     def openChatWindow(self):
         self.window=ChatWindow(self.main_window,self.client)
-        self.ui = Ui_ChatWindow(self.client)
+        self.ui = Ui_ChatWindow(self.client,self.window)
         self.ui.setupUi(self.window)
         self.main_window.hide()
         self.window.show()
