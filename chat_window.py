@@ -114,9 +114,13 @@ class Ui_ChatWindow(object):
             self.listWidget.takeItem(row)
     #Will send whatever is in the input
     def send_message(self):
+        #Potential XSS vulnerability here, maybe check out later
         message=self.input_message.text()
-        self.client.send_message(message)
-        self.addChatMessage("&lt;{}&gt;:{}".format(self.client.user.username,message))
+        userdata=self.client.user
+        colourtouse=userdata.colour if userdata.colour!=None else "#000000"
+        strtosend="<p style=\"color:{}\">&lt;{}&gt;:{}</p>".format(colourtouse,userdata.username,message)
+        self.client.send_message(strtosend)
+        self.addChatMessage(strtosend)
         self.input_message.setText("")
 '''
 if __name__ == "__main__":

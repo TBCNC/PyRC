@@ -85,9 +85,8 @@ class Server:
     
     def handle_message(self,msg,src):
         if msg.msgtype==MessageType.UserMessage:#Add different colour coding later
-            strtosend = "&lt;"+self.client_list[src].user_data.username+"&gt;:"+msg.msg
-            print(strtosend)
-            msgtosend = Message(MessageType.UserMessage,strtosend)
+            print(msg.msg)
+            msgtosend = Message(MessageType.UserMessage,msg.msg)
             self.send_msg_to_all(msgtosend,src)
         elif msg.msgtype==MessageType.UserInfo:
             userData = pickle.loads(msg.msg)

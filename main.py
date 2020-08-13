@@ -90,7 +90,8 @@ class Ui_LoginWindow(object):
         self.text_ipaddr.returnPressed.connect(self.startConnection)
         self.text_bio.returnPressed.connect(self.startConnection)
         self.text_port.returnPressed.connect(self.startConnection)
-        self.text_username.returnPressed.connect(self.startConnection)        
+        self.text_username.returnPressed.connect(self.startConnection)      
+        self.text_colour.returnPressed.connect(self.startConnection)  
         self.formLayout.setWidget(8, QtWidgets.QFormLayout.SpanningRole, self.button_connect)
         self.verticalLayout.addLayout(self.formLayout)
         self.label_connection_info = QtWidgets.QLabel(self.centralwidget)
@@ -117,6 +118,9 @@ class Ui_LoginWindow(object):
         usernameregex = re.compile("^\w{4,12}$")
         if not usernameregex.match(self.text_username.text()):
             return (False,"Your username must be between 4 and 12 characters long with no spaces!")
+        colourregex=re.compile("^#[A-F0-9]{6}$")
+        if not colourregex.match(self.text_colour.text()) and self.text_colour.text()!="":
+            return (False,"Your colour must be in hexadecimal form (i.e #0A1B2C)")
         return (True,"OK")
 
     def userAccepted(self):
@@ -146,8 +150,10 @@ class Ui_LoginWindow(object):
         if result[0]:
             self.button_connect.setEnabled(False)
             self.updateStatusLabel("Status:Attempting to connect to server...")
+            colourregex=re.compile("^#[A-Fa-f0-9]{6}$")
             self.user = User(self.text_username.text(),self.text_bio.text())
-            #self.client = Client(self.user,self.text_ipaddr.text(),int(self.text_port.text()))
+            if colourregex.match(self.text_colour.text()):#If they have actually entered a colour
+                self.user.colour=self.text_colour.text()
             self.initClient(self.user,self.text_ipaddr.text(),int(self.text_port.text()))
             res = self.client.connect_to_server()
             if res[0]:
