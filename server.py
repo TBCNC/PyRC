@@ -5,7 +5,7 @@ import threading
 from messages import Message
 from messages import MessageType
 from user import User
-
+import sys,getopt
 #Acts as a simple struct for handling connections
 class Connection:
     def __init__(self,conn_sock,user_data):
@@ -135,15 +135,58 @@ class Server:
         self.sock.shutdown(socket.SHUT_RDWR)#Stop receive and sends
         self.sock.close()
 
-print("Welcome to PyRC server")
-ipaddr = input("Please enter the IP you are binding to:")
-port = int(input("Please enter a port:"))
-servername = input("Enter a server name:")
-motd = input("Enter a MOTD:")
-ourServer = Server(ipaddr,port,servername,motd)
-try:
-    ourServer.start_server()
-except KeyboardInterrupt:
-    print("Closing server...")
-    ourServer.close_server()
-    print("Server closed.")
+def print_help():
+    print("PyRC Server Setup")
+    print("Command usage:\nserver.py -i <ip_address> -p <port> -n <name> -m <motd>")
+    print("or\nserver.py --ip=<ip_address> --port=<port> --name=<name> --motd=<motd>")
+def main(argv):
+    ipaddr=None
+    port=None
+    name=None
+    motd=""
+    try:
+        opts,args=getopt.getopt(argv,"hi:p:n:m:",["ip=","port=","name=","motd="])
+    except getopt.GetoptError:
+        print_help()
+        sys.exit(2)
+    for opt,arg in opts:
+        if opt=='-h':
+            print_help()
+            sys.exit()
+        elif opt in ("-i","--ip"):
+            ipaddr=arg
+        elif opt in ("-p","--port"):
+            port=arg
+        elif opt in ("-n","--name"):
+            name=arg
+        elif opt in ("-m","--motd"):
+            motd=arg
+    if ipaddr==None:
+        print("Missing IP address.")
+        sys.exit(2)
+    if port==None:
+        print("Missing port number.")
+        sys.exit(2)
+    if not port.isnumeric():
+        print("Port number not numeric.")
+        sys.exit(2)
+    if name==None:
+        print("Missing name.")
+        sys.exit(2)
+    print("PyRC Chat Server")
+    print("Properties:")
+    print("IP:{}:{}".format(ipaddr,port))
+    print("Name:"+name)
+    print("MOTD:{}".format(motd if motd!="" else "None"))
+    print("Initializing server...")
+    ourServer=Server(ipaddr,int(port),name,motd)
+    print("Starting server...")
+    try:
+        ourServer.start_server()
+        print("Server started.")
+    except KeyboardInterrupt:
+        print("Closing server...")
+        ourServer.close_server()
+        print("Server closed.")
+if __name__=="__main__":
+    main(sys.argv[1:])
