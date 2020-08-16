@@ -89,7 +89,7 @@ class Ui_ChatWindow(object):
         msgbox.exec_()
     def retranslateUi(self, ChatWindow):
         _translate = QtCore.QCoreApplication.translate
-        ChatWindow.setWindowTitle(_translate("ChatWindow", "ChatWindow"))
+        ChatWindow.setWindowTitle(_translate("ChatWindow", "[{}] PyRC Chat ({})".format(self.client.addr+":"+str(self.client.port),self.client.user.username)))
         self.label_usersonline.setText(_translate("ChatWindow", "Users Online:"))
         self.button_send.setText(_translate("ChatWindow", "Send"))
     def addChatMessage(self,message):
