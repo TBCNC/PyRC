@@ -16,6 +16,8 @@ class MessageType(enum.Enum):
     GetUserListResp=7
     NewUserJoined=8
     UserDisconnected=9
+    WhisperMessage=10
+    WhisperMessageError=11
 #Very basic setup, add things later here such as channel, date, etc.
 class Message:
     def __init__(self,msgtype,msg):

@@ -118,9 +118,15 @@ class Ui_ChatWindow(object):
         message=self.input_message.text()
         userdata=self.client.user
         colourtouse=userdata.colour if userdata.colour!=None else "#000000"
-        strtosend="<p style=\"color:{}\">&lt;{}&gt;:{}</p>".format(colourtouse,userdata.username,message)
-        self.client.send_message(strtosend)
-        self.addChatMessage(strtosend)
+        if message.startswith("/whisper"):
+            contents=message.split(" ",2)
+            strtosend="<p style=\"color:{}\">[WHISPER]&lt;{}&gt;:{}</p>".format(colourtouse,userdata.username,contents[2])
+            self.client.send_whisper(contents[1],strtosend)
+            self.addChatMessage(strtosend)
+        else:
+            strtosend="<p style=\"color:{}\">&lt;{}&gt;:{}</p>".format(colourtouse,userdata.username,message)
+            self.client.send_message(strtosend)
+            self.addChatMessage(strtosend)
         self.input_message.setText("")
 '''
 if __name__ == "__main__":

@@ -79,6 +79,10 @@ class Client(QtCore.QObject):
         newMsg = Message(MessageType.UserMessage,msg)
         toSend = pickle.dumps(newMsg)
         self.sock.send(toSend)
+    def send_whisper(self,user,msg):
+        newMsg = Message(MessageType.WhisperMessage,user+" "+msg)
+        toSend = pickle.dumps(newMsg)
+        self.sock.send(toSend)
     def join_threads(self):
         for thread in self.running_threads:
             thread.join()

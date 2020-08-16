@@ -24,7 +24,6 @@ class Server:
         self.motd=motd
         self.buffer_size=1024
     def start_server(self):
-        print("Starting server...")
         self.server_running=True
         self.sock=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
         self.sock.bind((self.addr,self.port))
@@ -62,6 +61,11 @@ class Server:
     def send_new_user_joined(self,user,exconn=None):
         ourMsg=Message(MessageType.NewUserJoined,user)
         self.send_msg_to_all(ourMsg,exconn)
+    def find_user(self,username):
+        for key,val in self.client_list.items():
+            if val.user_data.username==username:
+                return key
+        return None
     def send_message(self,msgtype,msg,conn):
         ourMessage=Message(msgtype,msg)
         data=pickle.dumps(ourMessage)
@@ -107,7 +111,18 @@ class Server:
         elif msg.msgtype==MessageType.GetUserListReq:
             print("All users requested")
             self.send_all_users(src)
-        
+        elif msg.msgtype==MessageType.WhisperMessage:
+            #Separate user and rest of message with a space
+            contents=msg.msg.split(" ",1)
+            print("Received whisper:{}".format(contents))
+            conntosend=self.find_user(contents[0])
+            if conntosend!=None:
+                print("Sending whisper")
+                #Found a user to send to
+                self.send_message(MessageType.UserMessage,contents[1],conntosend)
+            else:
+                self.send_message(MessageType.WhisperMessageError,"User {} does not exist.".format(contents[0]),src)
+            
     #Send a message to all connected sockets other than exclusion_sock
     def send_msg_to_all(self,msg,exclusion_conn=None):
         for conn in self.client_list:
