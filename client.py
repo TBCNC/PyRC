@@ -15,6 +15,7 @@ class Client(QtCore.QObject):
     signal_obtained_usernames=QtCore.pyqtSignal(list)
     signal_new_user=QtCore.pyqtSignal(str)#For now, maybe change to user
     signal_lost_user=QtCore.pyqtSignal(str)#For now, maybe change to user
+    signal_whisper_error=QtCore.pyqtSignal(str)
     def __init__(self,user,addr,port):
         super(QtCore.QObject,self).__init__()
         self.user = user
@@ -74,6 +75,8 @@ class Client(QtCore.QObject):
             self.signal_new_user.emit(msg.msg)
         elif msg.msgtype==MessageType.UserDisconnected:
             self.signal_lost_user.emit(msg.msg)
+        elif msg.msgtype==MessageType.WhisperMessageError:
+            self.signal_whisper_error.emit(msg.msg)
     #Maybe should do better error handling here? Fine for now
     def send_message(self,msg):
         newMsg = Message(MessageType.UserMessage,msg)

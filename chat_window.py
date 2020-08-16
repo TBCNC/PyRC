@@ -28,6 +28,7 @@ class Ui_ChatWindow(object):
         self.client.signal_obtained_usernames.connect(self.obtainedUserList)
         self.client.signal_new_user.connect(self.newUserJoined)
         self.client.signal_lost_user.connect(self.userDisconnected)
+        self.client.signal_whisper_error.connect(self.whisperError)
     def setupUi(self, ChatWindow):
         ChatWindow.setObjectName("ChatWindow")
         ChatWindow.resize(808, 440)
@@ -76,6 +77,8 @@ class Ui_ChatWindow(object):
         self.retranslateUi(ChatWindow)
         QtCore.QMetaObject.connectSlotsByName(ChatWindow)
 
+    def whisperError(self,msg):
+        self.addChatMessage("[WHISPER ERROR]{}".format(msg))
     #Signal for losing connection
     def lostConnection(self):
         print('Lost connection')
